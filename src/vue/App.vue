@@ -1,14 +1,25 @@
 <template>
     <span class = "rowheader">Possiblities:</span>
-    <clue v-for = "(item, index) in remainingghosts" :title="item"></clue>
+    <div style = "display: flex">
+      <clue v-for = "(item, index) in remainingghosts" :title="item"></clue>
+
+    </div>
     <br>
 
+
     <span class = "rowheader">Found: </span>
+  <div style = "display: flex">
     <clue v-for = "(item, index) in foundclues" :title="item"></clue>
+
+  </div>
     <br>
 
     <span class = "rowheader">Looking For: </span>
+  <div style = "display: flex">
     <clue v-for = "(item, index) in possibleclues" :title="item"></clue>
+
+
+  </div>
 </template>
 
 <script>
@@ -98,6 +109,7 @@ export default {
 
 <style scoped>
 .rowheader {
-  color: black;
+  color: #aeaeae;
+  font-family: 'East Sea Dokdo', cursive;
 }
 </style>

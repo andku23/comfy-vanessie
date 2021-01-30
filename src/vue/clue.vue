@@ -24,7 +24,9 @@
     background: none;
     border: none;
     margin: 1px;
-    background: white;
+    background: #ffd1dc;
     text-shadow: 0 0 24px white;
+    padding: 3px;
+    color: #776990;
 }
 </style>

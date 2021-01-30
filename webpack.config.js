@@ -59,7 +59,7 @@ module.exports = (env = {}) => ({
     inline: true,
     hot: true,
     stats: 'minimal',
-    contentBase: __dirname,
+    contentBase: './dist',
     overlay: true
   }
 })
