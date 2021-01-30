@@ -5,6 +5,7 @@
     "build": "webpack --env.prod"
   },
   "dependencies": {
+    "comfy.js": "^1.1.6",
     "vue": "^3.0.0-rc.9"
   },
   "devDependencies": {
