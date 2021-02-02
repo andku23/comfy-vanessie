@@ -1,26 +1,29 @@
 <template>
   <div>
     <div v-if = "isShowingGhosts">
-      <span class = "rowheader">Possiblities:</span>
+
       <div style = "display: flex">
+        <div class = "rowheader">Possiblities:</div>
         <clue v-for = "(item, index) in remainingghosts" :title="item"></clue>
 
       </div>
       <br>
     </div>
 
-    <div>
-      <span class = "rowheader">Found: </span>
+    <div v-if = "isShowingClue">
       <div style = "display: flex">
+        <div class = "rowheader">Found: </div>
+
         <clue v-for = "(item, index) in foundclues" :title="item"></clue>
 
       </div>
       <br>
     </div>
 
-    <div>
-      <span class = "rowheader">Looking For: </span>
+    <div v-if = "isShowingClue">
       <div style = "display: flex">
+        <div class = "rowheader">Looking For: </div>
+
         <clue v-for = "(item, index) in possibleclues" :title="item"></clue>
       </div>
     </div>
@@ -39,13 +42,14 @@ export default {
   },
   data: function() {
     return {
-      ghostRevealModes: {
+      revealModes: {
         'ALWAYS': 0,
         'ONFIRSTCLUE': 1,
         'ONLASTCLUE': 2,
         'NEVER': 3
       },
       ghostRevealMode: 0,
+      clueRevealMode: 0,
       username: "vanessienessie",
       clues: ["orbs", "freezing", "fingerprints", "box", "writing", "emf"],
       ghosts: {
@@ -68,6 +72,12 @@ export default {
     };
   },
   mounted() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const channelName = urlParams.get('channel');
+    if(channelName != null){
+      this.username = channelName;
+    }
+
     this.resetClues();
     this.resetGhosts();
 
@@ -82,36 +92,69 @@ export default {
         if (this.clues.includes(command)) {
           this.addClue(command);
           this.calculateGhosts();
+          this.calculatePossibleClues();
         } else if (command === "phasmo-reset") {
           this.resetClues();
           this.resetGhosts();
         } else if (command === "phasmo-ghostmode") {
           if(args.length > 0){
             let ghostMode = args[0].toUpperCase();
-            console.log(ghostMode)
-            if(this.ghostRevealModes[ghostMode] != null){
-              console.log(this.ghostRevealModes[ghostMode]);
-              this.ghostRevealMode =  this.ghostRevealModes[ghostMode];
+            if(this.revealModes[ghostMode] != null){
+              this.ghostRevealMode =  this.revealModes[ghostMode];
+            }
+          }
+        } else if (command === "phasmo-cluemode") {
+          if(args.length > 0){
+            let clueMode = args[0].toUpperCase();
+            if(this.revealModes[clueMode] != null){
+              this.clueRevealMode =  this.revealModes[clueMode];
+            }
+          }
+        } else if (command === "phasmo-mode") {
+          if(args.length > 0){
+            let clueMode = args[0].toUpperCase();
+            if(this.revealModes[clueMode] != null){
+              this.clueRevealMode =  this.revealModes[clueMode];
+              this.ghostRevealMode =  this.revealModes[clueMode];
             }
           }
         }
       }
     }
-    ComfyJS.Init( "vanessienessie" );
+    ComfyJS.Init( this.username );
   },
   computed: {
     isShowingGhosts(){
       var isShowing = false;
       switch(this.ghostRevealMode){
-        case this.ghostRevealModes['ALWAYS']:
+        case this.revealModes['ALWAYS']:
           isShowing = true;
           break;
-        case this.ghostRevealModes['ONFIRSTCLUE']:
+        case this.revealModes['ONFIRSTCLUE']:
           if(this.foundclues.length >= 1){
             isShowing = true;
           }
           break;
-        case this.ghostRevealModes['ONLASTCLUE']:
+        case this.revealModes['ONLASTCLUE']:
+          if(this.foundclues.length >= 2){
+            isShowing = true;
+          }
+          break;
+      }
+      return isShowing;
+    },
+    isShowingClue(){
+      var isShowing = false;
+      switch(this.clueRevealMode){
+        case this.revealModes['ALWAYS']:
+          isShowing = true;
+          break;
+        case this.revealModes['ONFIRSTCLUE']:
+          if(this.foundclues.length >= 1){
+            isShowing = true;
+          }
+          break;
+        case this.revealModes['ONLASTCLUE']:
           if(this.foundclues.length >= 2){
             isShowing = true;
           }
@@ -124,8 +167,6 @@ export default {
 
     addClue(command){
       this.foundclues.push(command);
-      this.possibleclues.splice(this.possibleclues.indexOf(command), 1);
-      console.log(this.possibleclues);
     },
     resetClues(){
       this.foundclues = [];
@@ -137,6 +178,17 @@ export default {
           if(!this.ghosts[this.remainingghosts[i]].includes(this.foundclues[j])){
             this.remainingghosts.splice(i, 1);
             break;
+          }
+        }
+      }
+    },
+    calculatePossibleClues(){
+      this.possibleclues = [];
+      for(let i = this.remainingghosts.length - 1; i >= 0; i--){
+        let currentGhost = this.ghosts[this.remainingghosts[i]];
+        for(let j = 0; j < currentGhost.length; j++){
+          if(!this.foundclues.includes(currentGhost[j]) && !this.possibleclues.includes(currentGhost[j])){
+            this.possibleclues.push(currentGhost[j]);
           }
         }
       }
@@ -157,5 +209,6 @@ export default {
 .rowheader {
   color: #aeaeae;
   font-family: 'East Sea Dokdo', cursive;
+  margin-right: 2px;
 }
 </style>
